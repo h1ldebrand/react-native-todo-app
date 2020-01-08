@@ -6,6 +6,8 @@ import { ADD_TODO, REMOVE_TODO, UPDATE_TODO, SHOW_LOADER, HIDE_LOADER, SHOW_ERRO
 import { ScreenContext } from '../screen/screenContext';
 import { Http } from '../../http';
 
+const dbUrl = 'https://react-native-todo-cafb8.firebaseio.com';
+
 export const TodoState = ({ children }) => {
     const initialState = {
         todos: [],
@@ -21,7 +23,7 @@ export const TodoState = ({ children }) => {
         clearError()
         try{
             const data = await Http.post(
-                'https://react-native-todo-cafb8.firebaseio.com/todos.json',
+                `${dbUrl}/todos.json`,
                 {title}
             )
             dispatch({type: ADD_TODO, title, id: data.name})
@@ -44,7 +46,7 @@ export const TodoState = ({ children }) => {
                     style: 'destructive',
                     onPress: async () => {
                         changeScreen(null)
-                        const response = await Http.delete(`https://react-native-todo-cafb8.firebaseio.com/todos/${id}.json`)
+                        const response = await Http.delete(`${dbUrl}/todos/${id}.json`)
                         dispatch({type: REMOVE_TODO, id})
                     }
                 }
@@ -57,11 +59,11 @@ export const TodoState = ({ children }) => {
         showLoader()
         clearError()
         try {
-            const data = await Http.get('https://react-native-todo-cafb8.firebaseio.com/todos.json')
+            const data = await Http.get(`${dbUrl}/todos.json`)
             let todos = []
             
             if(data){
-                const todos = Object.keys(data).map(key => ({...data[key], id: key}))
+                todos = Object.keys(data).map(key => ({...data[key], id: key}))               
             }
 
             dispatch({type: FETCH_TODOS, todos})
@@ -71,15 +73,13 @@ export const TodoState = ({ children }) => {
             hideLoader()
         }
         
-
-        
     }
 
     const updateTodo = async (id, title) => {
         clearError()
         try {
         const data = await Http.patch(
-            `https://react-native-todo-cafb8.firebaseio.com/todos/${id}.json`,
+            `${dbUrl}/todos/${id}.json`,
             {title}
             )
         const response = await dispatch({type: UPDATE_TODO, id, title})
@@ -95,9 +95,6 @@ export const TodoState = ({ children }) => {
     const showError = error => dispatch({type: SHOW_ERROR, error})
 
     const clearError = () => dispatch({type: CLEAR_ERROR})
-
-
-
 
     return(
         <TodoContext.Provider 
